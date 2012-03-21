@@ -1,0 +1,53 @@
+'The "correct" way, which is actually stupid
+REPL()
+
+Sub REPL
+  input = ""
+  While Text.ConvertToLowerCase(input) <> "q"
+    TextWindow.WriteLine("[q]uit >")
+    input = TextWindow.Read()  
+    Stack.PushValue("input", input)
+    evaluate()
+  EndWhile
+EndSub
+
+Sub evaluate
+  input1 = Stack.PopValue("input")
+  
+  'Yay! I have created a proper function!!! 
+  Stack.PushValue("split", input1)
+  Stack.PushValue("split", " ")
+  split()
+  args = Stack.PopValue("split")
+  
+  If Array.ContainsIndex(args[1]) Then
+    commands[args[1]]
+  Else
+    TextWindow.WriteLine("I don't understand. What do you want to do?")
+  EndIf 
+EndSub
+
+' This is truly my child
+Sub split
+  delimiter = Stack.PopValue("split")
+  str = Stack.PopValue("split")
+  split_index = 1
+  
+  While Text.GetLength(str) > 0
+    pos = Text.GetIndexOf(str, delimiter)
+    split_str_length = Text.GetLength(str)
+   
+   If pos = 0 Then 
+     arguments[split_index] = Text.GetSubTextToEnd(str, 1)
+     str = ""
+   ElseIf pos < split_str_length then
+     arguments[split_index] = Text.GetSubText(str, 1, pos - 1)
+     str = Text.GetSubTextToEnd(str, pos + 1)
+   EndIf
+    
+   split_index = split_index + 1
+  EndWhile
+  
+  Stack.PushValue("split", arguments)
+endSub
+

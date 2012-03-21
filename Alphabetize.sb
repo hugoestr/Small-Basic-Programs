@@ -1,0 +1,45 @@
+Sub main
+  TextWindow.Write("I am alphabetizebot! Give me some gibberish! ")
+  gibberish = Text.ConvertToLowerCase(TextWindow.Read())
+  result = ""
+  sorted[0] = ""
+
+  for i = 1 To Text.GetLength(gibberish)
+    char = Text.GetSubText(gibberish,i, 1)
+    code = Text.GetCharacterCode(char)
+    sort()
+  EndFor
+  
+  toResult()
+  TextWindow.WriteLine("Your expression, alphabetized, is " + result)
+EndSub
+
+Sub sort
+  count = Array.GetItemCount(sorted)
+  j = 1
+  
+  For  j = 1 To count
+    index = j + 1
+    
+    If code < sorted[index] Then
+      temp = sorted[index]
+      sorted[index] = code
+      code = temp
+      j = 1
+    EndIf
+    
+  EndFor
+  
+  sorted[j + 1] = code
+EndSub
+
+Sub toResult
+  For i = 1 To Array.GetItemCount(sorted)
+   index = i + 1
+   result = result +  Text.GetCharacter(sorted[index])
+ EndFor
+EndSub
+
+'Execute
+main()
+  

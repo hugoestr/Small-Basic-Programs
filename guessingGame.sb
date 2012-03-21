@@ -1,0 +1,40 @@
+
+Sub main
+  While 1 <> 2
+    TextWindow.Write("Do you want to guess a number between 1 and 100? [y]es [n]o ")
+    answer = TextWindow.Read()
+    
+    If Text.ConvertToLowerCase(answer) = "n" Then
+      Goto end
+    EndIf
+    
+    play_game()
+    
+  EndWhile
+  end: 
+EndSub
+
+Sub play_game
+  correct_answer = Math.GetRandomNumber(100)
+  user_answer = 0
+  
+  While correct_answer <> user_answer
+    TextWindow.Write("Give me a number ")
+    user_answer = TextWindow.Read()
+    
+    If user_answer > correct_answer Then
+      TextWindow.WriteLine("The number is smaller.")
+    EndIf
+    
+    If user_answer < correct_answer Then
+      TextWindow.WriteLine("The number is greater.")
+    EndIf
+    
+  EndWhile
+  
+  TextWindow.WriteLine("You got it right!")
+EndSub
+
+
+'Main
+main()

@@ -1,0 +1,234 @@
+'Customize for your game below.
+
+' Set here all of the initial variables for your game
+Sub initialize
+  GraphicsWindow.KeyDown = OnKeyDown
+  GraphicsWindow.MouseMove = OnMouseMove
+  
+  player_points = 0
+  computer_points = 0
+  
+  player_paddle = 170
+  computer_paddle = 170
+
+  direction = -1
+  new_set()
+  
+  player_paddle_image = ImageList.LoadImage("http://i89.photobucket.com/albums/k239/hugoestr/paddle.png")
+  computer_paddle_image = ImageList.LoadImage("http://i89.photobucket.com/albums/k239/hugoestr/paddle.png")    
+  ball_image = ImageList.LoadImage("http://i89.photobucket.com/albums/k239/hugoestr/ball.png")  
+  
+EndSub
+
+' start_input is where you enter the handled input
+' The variable 'key' stores the last key pressed down
+Sub start_input
+  
+  If key = "space" Then
+    game_state = "playing"
+    play_loop()
+  EndIf
+  
+  If key = "q" Then
+    Program.End()
+  EndIf
+  
+EndSub
+
+Sub game_input
+  player_paddle = GraphicsWindow.MouseY - 30
+  
+  If key = "s" Then
+    game_state = "over"
+  EndIf
+  
+EndSub
+
+Sub end_input
+  game_state = "start"
+  reset()
+EndSub
+
+' This is where you update the state in the game
+' You can use collision() to identify whether there was a collision found
+Sub update_state
+  check_winning_condition()
+  ball_x = ball_x + ball_speed_x 
+  ball_y = ball_y + ball_speed_y
+  
+  check_ball_collision()
+EndSub
+
+Sub check_winning_condition
+  If player_points = 21 Or computer_points = 21 Then
+    game_state = "over"
+  EndIf
+EndSub
+
+Sub check_ball_collision
+  ball_edge_collision()
+  ball_paddle_collision()  
+EndSub
+
+Sub ball_edge_collision
+  If ball_x < -10 Then
+    computer_points = computer_points + 1
+    Shapes.SetText(computer_score, computer_points)
+    direction = -1
+    new_set()
+  EndIf
+  
+  If ball_x > 610 Then
+    player_points = player_points + 1
+    Shapes.SetText(player_score, player_points)
+    direction = 1
+    new_set()
+  EndIf
+  
+  If ball_y < 0 Or ball_y > 400 Then
+      ball_speed_y = ball_speed_y * -1
+  EndIf
+  
+  
+EndSub
+
+Sub new_set
+  ball_x = 295
+  ball_y = 195
+  
+  ball_speed_x = direction * 0.02
+  ball_speed_y = 0
+EndSub
+
+Sub ball_paddle_collision
+  If ball_x = 30 Then
+    If ball_y <= player_paddle + 60 And ball_y >= player_paddle Then
+     paddle_strike()
+    EndIf
+  EndIf
+
+  If ball_x = 570 Then
+    If ball_y <= computer_paddle + 60 And ball_y >= computer_paddle Then
+      paddle_strike()
+    EndIf
+  EndIf  
+EndSub
+
+Sub paddle_strike
+   ball_speed_x = ball_speed_x * -1 
+   ball_speed_y = ( Math.Remainder((ball_y - (player_paddle + 30)) , 10) ) / 100
+EndSub
+
+
+'The start and end screen
+Sub window_init
+  GraphicsWindow.Width = 600
+  GraphicsWindow.Height = 400
+  GraphicsWindow.BackgroundColor = "Black"
+  GraphicsWindow.Show()
+EndSub
+
+Sub start_screen
+  GraphicsWindow.Clear()
+  GraphicsWindow.BrushColor = "White"
+  
+  GraphicsWindow.FontSize = 60
+  GraphicsWindow.DrawText(200, 100, "Pong-o")
+  
+  GraphicsWindow.FontSize = 15
+  GraphicsWindow.DrawText(200, 200, "Press 'spacebar' to start")
+  GraphicsWindow.DrawText(200, 220, "Press 'q' to quit")
+  
+  GraphicsWindow.Show()
+EndSub
+
+Sub play_screen
+  GraphicsWindow.Clear()
+  GraphicsWindow.BrushColor = "White"
+  
+  player_paddle_shape = Shapes.AddImage(player_paddle_image)
+  computer_paddle_shape = Shapes.AddImage(computer_paddle_image)
+  ball_shape = Shapes.AddImage(ball_image)
+  
+  player_score = Shapes.AddText(player_points)
+  computer_score = Shapes.AddText(computer_points)
+  
+  Shapes.Move(player_paddle_shape, 20, player_paddle)
+  Shapes.Move(computer_paddle_shape, 570, computer_paddle)
+  Shapes.Move(ball_shape, ball_x, ball_y)
+  
+  Shapes.Move(player_score, 200, 100)
+  Shapes.Move(computer_score, 400, 100)
+  
+EndSub
+
+Sub end_screen
+  GraphicsWindow.Clear()
+  GraphicsWindow.BrushColor = "White"
+  
+  GraphicsWindow.FontSize = 60
+  GraphicsWindow.DrawText(120, 100, "Game Over")
+  
+  GraphicsWindow.FontSize = 15
+  GraphicsWindow.DrawText(180, 200, "Press any key to continue")
+  
+EndSub
+'---------------------------------------------------------------------------------------------
+'Entry point
+game_state = "start"
+start_program()
+'----------------------------------------------------------------------------------------------
+'The core game subroutines
+Sub start_program
+  window_init()
+  reset()
+EndSub
+
+Sub reset
+  initialize()
+  start_screen()  
+EndSub
+
+Sub play_loop
+  play_screen()
+  While game_state = "playing"
+    update_state()
+    update_screen()
+  EndWhile
+  end_screen()
+EndSub
+
+'It does the display of the game units
+Sub update_screen
+  Shapes.Move(player_paddle_shape, 20, player_paddle)
+  Shapes.Move(ball_shape, ball_x, ball_y)
+EndSub
+
+Sub collision
+EndSub
+
+'Basic input handling. It will  handle input depending on whether one is playing or not
+Sub OnKeyDown
+  key = Text.ConvertToLowerCase(GraphicsWindow.LastKey)
+  input_handling()
+EndSub
+
+Sub OnMouseMove
+  'Shapes.SetText(label, "Mouse Y: " + Mouse.MouseY)
+  input_handling()
+EndSub
+
+Sub input_handling
+  If game_state = "playing" Then
+    game_input()  
+  ElseIf game_state = "start" Then
+    start_input()
+  Elseif game_state = "over" Then
+    end_input()
+  EndIf
+EndSub
+
+
+
+
+

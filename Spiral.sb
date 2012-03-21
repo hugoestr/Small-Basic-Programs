@@ -1,0 +1,18 @@
+GraphicsWindow.BackgroundColor = "Black"
+GraphicsWindow.PenColor = "Green"
+
+Turtle.Speed = 10
+
+Turtle.X = 100
+Turtle.Y = 400
+
+
+angle = 1
+
+For b = 1 To 1000
+  Turtle.Move(10)
+  Turtle.Turn(angle)
+  angle = angle + 0.1
+EndFor
+
+Turtle.Hide()

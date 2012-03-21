@@ -1,0 +1,14 @@
+GraphicsWindow.PenColor = "Red"
+Turtle.Speed = 10
+
+For t = 6 to 100
+  Turtle.Turn(10)
+  hexagon()
+EndFor
+
+Sub hexagon
+    For i = 1 To 6
+    Turtle.Move(50)
+    Turtle.Turn(60)
+  EndFor
+EndSub
