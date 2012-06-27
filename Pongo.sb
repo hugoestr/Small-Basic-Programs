@@ -18,14 +18,19 @@ Sub initialize
   computer_paddle_image = ImageList.LoadImage("http://i89.photobucket.com/albums/k239/hugoestr/paddle.png")    
   ball_image = ImageList.LoadImage("http://i89.photobucket.com/albums/k239/hugoestr/ball.png")  
   
+  ai_reaction_time = 14
+  ai_last_check = 0
+  ai_seen_direction = 0
+  ai_seen_position = 200
+  ai_speed = 1
 EndSub
 
 ' start_input is where you enter the handled input
 ' The variable 'key' stores the last key pressed down
 Sub start_input
-  
   If key = "space" Then
     game_state = "playing"
+    key = "garbage"
     play_loop()
   EndIf
   
@@ -36,8 +41,6 @@ Sub start_input
 EndSub
 
 Sub game_input
-  player_paddle = GraphicsWindow.MouseY - 30
-  
   If key = "s" Then
     game_state = "over"
   EndIf
@@ -45,22 +48,68 @@ Sub game_input
 EndSub
 
 Sub end_input
-  game_state = "start"
-  reset()
+  If key <> "garbage" Then
+    game_state = "start"
+    reset()
+  EndIf
 EndSub
 
 ' This is where you update the state in the game
 ' You can use collision() to identify whether there was a collision found
 Sub update_state
   check_winning_condition()
-  ball_x = ball_x + ball_speed_x 
-  ball_y = ball_y + ball_speed_y
-  
+  move_ball()
+  ai_move()
   check_ball_collision()
 EndSub
 
+'---------------------------- AI section -----------------------------------------------
+Sub ai_move
+  ai_check_decision()  
+  ai_check_boundaries()
+EndSub 
+
+Sub ai_check_boundaries
+  If computer_paddle <= 0 Then
+    ai_seen_direction = 1
+    computer_paddle = 0
+  EndIf
+  
+  If computer_paddle >= 370 Then
+    ai_seen_direction = -1
+    computer_paddle = 370
+  EndIf
+EndSub
+
+Sub ai_check_decision
+  If ai_reaction_time = ai_last_check Then
+    ai_check_direction()
+    ai_last_check = 0
+    computer_paddle = computer_paddle + (ai_speed * ai_seen_direction)
+  Else
+    ai_last_check = ai_last_check + 1
+  EndIf 
+EndSub
+
+Sub ai_check_direction
+  direction_value = ball_y - computer_paddle -30
+  If direction_value = 0 Then
+    ai_seen_direction = 0
+  ElseIf direction_value > 0 Then
+    ai_seen_direction = 1
+  Else
+    ai_seen_direction = -1
+  EndIf
+  ai_seen_position = ball_y
+EndSub
+'---------------------------------------------------------------------------------------
+Sub move_ball
+  ball_x = ball_x + ball_speed_x 
+  ball_y = ball_y + ball_speed_y
+EndSub
+
 Sub check_winning_condition
-  If player_points = 21 Or computer_points = 21 Then
+  If player_points = 11 Or computer_points = 11 Then
     game_state = "over"
   EndIf
 EndSub
@@ -98,17 +147,20 @@ Sub new_set
   
   ball_speed_x = direction * 0.02
   ball_speed_y = 0
+  
+  ai_last_check = 0
+  computer_paddle = 170
 EndSub
 
 Sub ball_paddle_collision
   If ball_x = 30 Then
-    If ball_y <= player_paddle + 60 And ball_y >= player_paddle Then
+    If ball_y <= player_paddle + 60 And ball_y >= player_paddle - 13 Then
      paddle_strike()
     EndIf
   EndIf
 
   If ball_x = 570 Then
-    If ball_y <= computer_paddle + 60 And ball_y >= computer_paddle Then
+    If ball_y <= computer_paddle + 60 And ball_y >= computer_paddle - 13 Then
       paddle_strike()
     EndIf
   EndIf  
@@ -117,6 +169,7 @@ EndSub
 Sub paddle_strike
    ball_speed_x = ball_speed_x * -1 
    ball_speed_y = ( Math.Remainder((ball_y - (player_paddle + 30)) , 10) ) / 100
+   Sound.PlayClick() 
 EndSub
 
 
@@ -186,10 +239,15 @@ EndSub
 
 Sub reset
   initialize()
-  start_screen()  
+  start_screen()
+  
+  While "true" = "true"
+    input_handling()
+  EndWhile  
 EndSub
 
 Sub play_loop
+  input_handling()
   play_screen()
   While game_state = "playing"
     update_state()
@@ -202,6 +260,7 @@ EndSub
 Sub update_screen
   Shapes.Move(player_paddle_shape, 20, player_paddle)
   Shapes.Move(ball_shape, ball_x, ball_y)
+  Shapes.Move(computer_paddle_shape, 570, computer_paddle)
 EndSub
 
 Sub collision
@@ -210,12 +269,10 @@ EndSub
 'Basic input handling. It will  handle input depending on whether one is playing or not
 Sub OnKeyDown
   key = Text.ConvertToLowerCase(GraphicsWindow.LastKey)
-  input_handling()
 EndSub
 
-Sub OnMouseMove
-  'Shapes.SetText(label, "Mouse Y: " + Mouse.MouseY)
-  input_handling()
+Sub OnMOuseMove
+    player_paddle = GraphicsWindow.MouseY - 30
 EndSub
 
 Sub input_handling
