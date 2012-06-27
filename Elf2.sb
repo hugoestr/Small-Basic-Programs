@@ -1,0 +1,433 @@
+'Data! Where you write the script. At least for now
+
+'Data, Descrptions, prologue, epilogue, and credits
+descriptions["prologue"] = "'I should have bought cheetos at 7-11, but instead, I am in this tunnel. Oh, well, I hope crashing the celebration will be worth it.'"
+descriptions["epilogue"] = "You pick the folder and start reading. You realize that the Elf has been insane for years, and escaped the Elf asylum. That Dope Man tried to stop him, and switched the signs to trick him; and he failed. You hear a maniacal laugh, you hear steps coming. The door creaks open. The end?..."
+descriptions["designer"] = "Designed and programmed by Isabella & Hugo. For help, type 'help' To end, type 'quit'."
+descriptions["copyright"] = "Copyright Angry Elf Co."
+descriptions["title"] = "Angry Elf 2"
+
+'Data, nodes, rooms, spaces. 
+nodes[1] = "tunnel"
+nodes[2] = "trap_room"
+nodes[3] = "celebration_room"
+nodes[4] = "monster_room"
+nodes[5] = "humilliation_room"
+nodes[6] = "woods"
+
+'Data, space turns, if any
+space_turns["monster_room"] = 3
+space_turns["woods"] = 3
+
+'Data, links,  "north south  east west"
+links["tunnel"] = "false false trap_room woods" 
+links["trap_room"] = "false false false tunnel"
+links["celebration_room"] = "trap_room false false monster_room"
+links["monster_room"] = "false false false false"
+links["humilliation_room"] = "false false false false"
+links["woods"] = "tunnel false false false"
+
+'Data, descriptions
+descriptions["tunnel"] = "You are in a dark, damp, musty tunnel. To the West you see a dot of sunlight. To the East you see the light of flickering candles."
+descriptions["trap_room"] = "The orange, flickering light shows you what looks like a victorian" 
+descriptions["trap_room"] = descriptions["trap_room"] + " parlor filled with newspapers. You walk through a labyrinth of trash. There is a lever with a sign that" 
+descriptions["trap_room"] = descriptions["trap_room"] +  " says, 'Don't use lever'' There are black velvet paintings of Elvis, and a giant clown face on the wall. There is a table with food: a banana cream pie and a cream soda."
+descriptions["celebration_room"] = "You find a bare, white plastered room, with windows letting the sun stream in. There is a modest wood table with coke and twinkies. There is a manila folder with what looks like medical documents."
+descriptions["monster_room"] = "You are in dark, circular room lightened with torches. On the East there is a door that says WC. To the South there is a door that says Celebration Room. There is a sword on the floor. But in front of you there is a giant, horrifying, vicious bunny!"
+descriptions["humilliation_room"] = "You are in a strongly lit white padded room. You are wearing a dunce cap. There is blackboard that says, 'I have been a naughty child' 100 times. When you look up, you see an angry, angry Elf.'"
+descriptions["woods"] = "You are in the woods. You see the entrance to the cave to the North, and trails leading to a suburban street just a few meters away."
+
+'Data, items
+items["tunnel"] = "toilet-paper"
+items["woods"] = "carrots plastic-gold-coins"
+items["monster_room"] = "sword"
+items["humilliation_room"] = "bamboo"
+items["trap_room"] = "dirty-socks dirty-plates old-pictures pie granpas-communist-party-card old-records broken-toys newspapers enigma-machine voynich-manuscript old-receipts dead-rat broken-picture thread tire radioactive-waste roof-shingles moldy-books used-dental-floss dopemans-cape stop-sign tennis-racket stuffed-skunk smurf-figures animal-bones toothpicks dry-leaves clothespins christmas-orbs magic-potion couch beer-cans grenades ammo stamps HarryTruman-poster butterfly-chads confederate-money mexican-jumping-beans the-holy-grail  dust-mites 50s-curtains VHS-tapes pinball-machine pieces-of-eight ruby-slippers happy-meal-toys moldy-rags diapers"
+
+'Data, limits
+item_limit = 2
+turns = 0
+instant_win = "false"
+
+'Room state
+room_links["n"] = "false"
+room_links["s"] = "false"
+room_links["e"] = "trap_room"
+room_links["w"] = "woods"
+
+'Game (initial) state
+position = "tunnel"
+posessions["lint"] = "lint"
+success = "false"
+
+' The command subroutines
+commands[1]  = "l" ' look
+commands[2]  = "n" ' north
+commands[3]  = "s" ' south
+commands[5]  = "e" ' east
+commands[6]  = "w" ' west
+commands[7]  = "p" ' pick
+commands[8]  = "d" ' drop
+commands[9]  = "q" ' quit
+commands[10] = "h" ' help
+commands[11] = "i" 'inventory 
+commands[12] = "u" 'use 
+commands[13] = "t" 'throw
+commands[14] = "f" 'flatter
+
+
+'The main entry to the program. Read-Evaluate-Print-Loop REPL!!!!
+Prologue()
+REPL()
+
+If success = "true" Then
+  Epilogue()
+Else
+  Quit()
+EndIf
+
+'Prolog and epilog
+Sub Prologue
+  TextWindow.ForegroundColor = "Red"
+  TextWindow.Title = "Elf 2"
+  TextWindow.WriteLine(descriptions["title"])
+  TextWindow.WriteLine(descriptions["designer"])
+  TextWindow.WriteLine(descriptions["copyright"])
+  TextWindow.WriteLine("")
+  TextWindow.ForegroundColor = "Green"
+  TextWindow.WriteLine(descriptions["prologue"])
+
+  look()
+EndSub
+
+Sub Epilogue
+  TextWindow.WriteLine(descriptions["epilogue"])
+EndSub
+
+Sub Quit
+  TextWindow.WriteLine("You gave up? You are a shame to your family. You never deserved to play our games. Go away! ")
+EndSub
+
+'The REPL subrountines
+Sub REPL
+  input = ""
+  delimiter = " "
+  While Text.ConvertToLowerCase(input) <> "q"
+    TextWindow.Write(">")
+    split_input = Text.ConvertToLowerCase(TextWindow.Read())
+    split() 
+    input = split_result[1]
+    evaluate()
+    turn_check()
+  EndWhile
+  end:
+EndSub
+
+Sub evaluate
+  possible_command = Text.GetSubText(input, 1, 1)
+  If Array.ContainsValue(commands, possible_command) Then
+    command = possible_command
+    execute_command()
+  Else
+    TextWindow.WriteLine("I don't understand. What do you want to do?")
+  EndIf 
+EndSub
+
+Sub execute_command
+  'TextWindow.WriteLine("current command: " + command)
+  If command = "l" Then
+    look()
+  ElseIf command = "n" or command = "s" or command = "e" or command = "w" Then
+    move()
+  ElseIf command = "p" Then
+    pick()
+  ElseIf command = "d" Then 
+    drop()
+  ElseIf command = "h" Then 
+    help()
+  ElseIf command = "i" Then 
+    inventory()
+  ElseIf command = "u" Then 
+    use()
+  Elseif command = "t" Then
+    throw()
+  Elseif command = "f" Then
+    flatter()
+  Elseif command = "q" Then
+    Goto end
+  EndIf
+EndSub
+
+'Commands
+Sub look
+  TextWindow.WriteLine(descriptions[position])
+  describeItems()
+EndSub
+
+Sub drop
+  dropped_item = split_result[2]
+
+  posessions[dropped_item] = ""
+  items[position] = items[position] +  " " + dropped_item
+  
+  TextWindow.WriteLine("You have dropped a " + dropped_item)
+EndSub
+
+Sub flatter
+  If position = "humilliation_room" Then
+    TextWindow.WriteLine("'Really? You really think those nice things about me?' said the Elf. 'Well, I will let you leave then.'")
+    humilliation_room_victory()
+  Else
+    TextWindow.WriteLine("Oh, thank you!")
+  EndIf  
+EndSub
+
+Sub use
+  used_item = split_result[2]
+  If position = "trap_room" And used_item = "lever" Then
+    room_links["s"] = "monster_room"
+    command = "s" 
+    move()
+  ElseIf Array.ContainsIndex(posessions, used_item) Then 
+    If used_item = "sword" Then  
+      TextWindow.WriteLine("You bravely brandish the sword in front of your foe! Then you notice how it flips and flops. You hold it up, and it says, 'Original Dope Man's Polyester Sword. Patent Pending.' 'Oh, dear,' you say 'this is useless.'")
+    ElseIf position = "monster_room" And used_item = "carrots" Then
+        instant_win = "true"
+        TextWindow.WriteLine("The monster greedily eats the carrots. He then purrs and wants to be petted by you.")
+        monster_room_resolution()
+    Else
+      TextWindow.WriteLine("You look cool when you use  " + used_item + ", but you have accomplished nothing.")
+    EndIf
+  Else
+    TextWindow.WriteLine("You are not carrying any " + used_item)
+  EndIf
+ 
+EndSub
+
+Sub throw
+  used_item = split_result[2]
+  target = split_result[4]
+  
+  If position = "trap_room" And used_item = "pie" And target = "clown" Then
+    trap_room_victory()
+  EndIf
+  
+EndSub
+
+Sub trap_room_victory
+    TextWindow.WriteLine("Yes, this is the mechanism that reveals two doors: to the South a door says, 'Celebration Room' to the East a door that says 'Flopsy'. Which direction do you take?")
+    room_links["s"] = "monster_room"
+    room_links["e"] = "celebration_room"
+EndSub
+
+Sub describeItems
+  TextWindow.WriteLine("You find the following trinkets:")
+  TextWindow.WriteLine(items[position])  
+EndSub
+
+Sub inventory  
+  arrayToString_array = Array.GetAllIndices(posessions)
+  arrayToString()
+  TextWindow.WriteLine("You have hoarded: ")
+  TextWindow.WriteLine(arrayToString_result)
+EndSub
+
+Sub help
+  TextWindow.WriteLine("This game makes no sense to you? Poor soul. ")
+  TextWindow.WriteLine("Read this. It should make it better.")
+    TextWindow.WriteLine("Type the word or abbreviation to do one of these actions.")
+  
+  TextWindow.WriteLine("look or l to see what is around you.") 
+  
+  TextWindow.WriteLine("north or n to go north")   
+  TextWindow.WriteLine("south or s to go south")
+  TextWindow.WriteLine("east or e to go east")
+  TextWindow.WriteLine("west or w to go west")
+  
+  TextWindow.WriteLine("pick or p to pick an object.")
+  TextWindow.WriteLine("drop or d to drop and object") 
+  TextWindow.WriteLine("'throw or t <object> to <stuff aiming at> to throw an object object") 
+  TextWindow.WriteLine("inventory or i for seeing what you have collected.")
+
+   
+  TextWindow.WriteLine("help or h to bring to get this screen.")
+  
+EndSub
+
+Sub pick
+  If Array.GetItemCount(posessions) < item_limit Then
+    picked_item = split_result[2]
+    room_items_split()
+  
+    If Array.ContainsValue(split_result, picked_item) Then
+    
+      posessions[picked_item] =  picked_item
+    
+      indexOfValue_array = split_result
+      indexOfValue_value = picked_item
+      indexOfValue()
+    
+      split_result[indexOfValue_result] = ""
+      arrayToString_array = split_result
+      arrayToString()
+    
+      items[position] = arrayToString_result
+    
+      TextWindow.WriteLine("You now have  " + picked_item)
+    Else
+      TextWindow.WriteLine("There ain't no " + picked_item  + " here, Bud.")
+    EndIf
+  Else 
+    TextWindow.WriteLine("You can't carry all that! Drop something first.")
+  Endif
+  
+EndSub
+
+Sub room_items_split
+  split_input = items[position]
+  split()
+EndSub
+
+Sub move
+  If room_links[command] <> "false" Then
+    position = room_links[command]
+    resetRoomlinks()
+    set_turns()
+    look()
+  EndIf
+EndSub
+
+Sub set_turns
+  If Array.ContainsIndex(space_turns,position) Then
+    turns = space_turns["monster_room"] 
+  Else
+    turns = 0
+  EndIf 
+EndSub
+
+Sub turn_check
+  If position = "celebration-room" Then
+    success = "true"  
+  EndIf
+  
+  If Array.ContainsIndex(space_turns, position) Then
+    If turns = 0 Then
+      turn_resolution()
+    Else
+      turns = turns - 1
+      turn_waiting()
+    EndIf
+  EndIf
+EndSub
+
+Sub turn_waiting
+  If position = "monster_room" Then
+    If command = "s" Or command = "e" Then
+      TextWindow.WriteLine("You reach to the door, but the bunny jumps in front of you!")      
+    EndIf
+  EndIf 
+ 
+ If position = "woods" And turns <= 1 Then
+   If command = "s" Or command = "w" Or command = "e" Then
+     woods_resolution()
+   EndIf
+ Endif 
+EndSub
+
+Sub woods_resolution
+  TextWindow.WriteLine("You start to walk down the street, following the delicious smell of pumpkin pie coming from one of the houses. As you come come closer to the street, a big animal jumps before you. It is the panda that killed you in the first game!")
+  TextWindow.WriteLine("You run back, trying to reach the tunnel entrance, but your body suddenly gives. You have fallen in a trap. You are tumbling down a metal tunnel. You fall on a hard, but padded floor.")
+  room_links["s"] = "humilliation_room"
+  command = "s" 
+  move()
+EndSub
+
+
+Sub turn_resolution
+  If position = "monster_room" Then
+    monster_room_resolution()
+  EndIf
+ 
+ If position = "woods" Then
+    woods_resolution() 
+ EndIf
+EndSub
+
+Sub monster_room_resolution
+  won_against_monster = Math.GetRandomNumber(100)
+  If  won_against_monster > 80 Or instant_win = "true" Then
+    instant_win = "false"
+    TextWindow.WriteLine("You stared at the bunny. Calmly, but firmly, you say, 'sit!' The bunny promptly sits down and whimpers. Years of watching the 'Dog Whisperer' have paid off.")  
+    monster_room_victory_paths()
+  Else
+    TextWindow.WriteLine("The beast attacks you. You feel its Eastery fluffy paws hit you hard in the stomach. The last thing you see is the evil look of the bunny approaching you. The world goes black.")  
+    room_links["s"] = "humilliation_room"
+    command = "s" 
+    move()
+  EndIf 
+EndSub
+
+Sub monster_room_victory_paths
+    room_links["s"] = "humilliation_room"
+    room_links["e"] = "celebration_room"
+    look()
+EndSub
+
+Sub humilliation_room_victory
+    room_links["w"] = "woods"
+    room_links["n"] = "monster_room"
+    TextWindow.WriteLine("'Thank you, gullible Elf,' you said. You see two doors, the door to the North says 'Exit'. The door to the West says 'Monster Room'")
+EndSub
+
+  
+
+
+Sub resetRoomLinks
+  split_input = links[position]
+  split()
+
+  room_links["n"] = split_result[1]
+  room_links["s"] = split_result[2]
+  room_links["e"] = split_result[3]
+  room_links["w"] = split_result[4]
+EndSub
+
+' useful functions
+Sub indexOfValue
+  For i = 1 To Array.GetItemCount(indexOfValue_array)
+    If indexOfValue_array[i] = indexOfValue_value Then
+      indexOfValue_result = i
+    EndIf
+  EndFor
+EndSub
+
+Sub arrayToString
+  arrayToString_result = ""
+  
+  keys = Array.GetAllIndices(arrayToString_array)
+  For i = 1 To Array.GetItemCount(keys)
+    arrayToString_result = arrayToString_result + " " + arrayToString_array[keys[i]]
+  EndFor    
+EndSub
+
+' uses split_input as input and split_result for results, default delimiter: space
+Sub split
+  split_index = 1
+  split_result = ""
+  str = split_input
+  
+  While Text.GetLength(str) > 0
+    pos = Text.GetIndexOf(str, delimiter)
+    split_str_length = Text.GetLength(str)
+   
+   If pos = 0 Then 
+     split_result[split_index] = Text.GetSubTextToEnd(str, 1)
+     str = ""
+   ElseIf pos < split_str_length then
+     split_result[split_index] = Text.GetSubText(str, 1, pos - 1)
+     str = Text.GetSubTextToEnd(str, pos + 1)
+   EndIf
+    
+   split_index = split_index + 1
+ EndWhile
+endSub

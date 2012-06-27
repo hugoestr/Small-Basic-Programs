@@ -1,0 +1,18 @@
+TextWindow.WriteLine ("ELF")
+TextWindow.WriteLine ("Game designed and programmed by Isabella")
+
+TextWindow.WriteLine ("You are in a dark,damp,smelly insect-infested tunnel.")
+TextWindow.WriteLine ("Do you [e]xit or do you [c]ontinue? [E/C] ")
+answer = Text.ConvertToLowerCase(TextWindow.Read())
+
+If answer = "e" Then
+  TextWindow.WriteLine ("You walk along a corridor and accidently slip on a banana peel and lubricant.")
+  TextWindow.WriteLine ("An angry elf you may have met (if you saw the source code) ostricizes you for 3 hours.")
+  TextWindow.WriteLine ("You are now in the ostricizing room.") 
+ElseIf answer = "c" Then
+  TextWindow.WriteLine ("You find yourself in a light, spacious room.")
+  TextWindow.WriteLine ("There is a red button. Do you press it?[y]es/ [n]o")
+  answer_two = Text.ConvertToLowerCase(TextWindow.Read())
+Else
+  TextWindow.WriteLine("That was not an option. The elf comes with and ax and kills you. The elf doesn't play.")
+EndIf
